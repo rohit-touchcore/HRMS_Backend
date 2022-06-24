@@ -12,6 +12,7 @@ const {
   getProfileById,
   editProfileProfile,
   getAllUsers,
+  getAllManagers,
 } = require("../controllers/user");
 
 const routeConfig = require("./routes.config");
@@ -36,7 +37,7 @@ router.post(
   routeConfig.EDIT_PROFILE_PICTURE,
   upload.single("avatar"),
   checkIfLoggedIn,
-  editProfileProfile 
+  editProfileProfile
 );
 
 router.post(routeConfig.GET_PROFILE_BY_ID, checkIfLoggedIn, getProfileById);
@@ -49,5 +50,6 @@ router.post(
 );
 
 router.post(routeConfig.DELETE_PROFILE, checkIfLoggedIn, deleteProfile);
+router.post(routeConfig.GET_ALL_MANAGERS, checkIfLoggedIn, getAllManagers);
 
 module.exports = router;

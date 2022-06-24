@@ -8,7 +8,8 @@ const rolesConfig = {
   users: {
     OWNER: 1,
     ADMIN_HR: 2,
-    EMPLOYEE: 3,
+    MANAGER: 3,
+    EMPLOYEE: 4,
   },
   attendance: {
     PRESENT: 0,

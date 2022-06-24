@@ -6,8 +6,8 @@ const filePath = path.join(__dirname, "../uploads/");
 
 exports.checkIfLoggedIn = async (req, res, next) => {
   try {
-    let id;
     const token = req.headers.authorization.split(" ")[1];
+    let id;
     if (token === null) {
       return res.status(401).json({
         message: "You are not authorized",

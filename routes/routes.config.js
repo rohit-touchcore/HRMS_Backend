@@ -4,6 +4,7 @@ const routeConfig = {
   SIGN_UP: "/signup",
   // Users
   GET_LEAVES: "/get-leaves",
+  GET_ALL_MANAGERS:"/get-all-managers",
   GET_APPROVED_LEAVES: "/get-approved-leaves",
   GET_LEAVES_TO_APPROVE: "/get-leaves-to-approve",
   GET_PROFILE_BY_ID: "/get-profile-by-id",

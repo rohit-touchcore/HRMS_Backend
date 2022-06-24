@@ -1,10 +1,10 @@
 const userSchema = require("../models/userSchema");
-
+const roles = require("./roles.config");
 // Get Leaves To Approve
 exports.getLeavesToApprove = async (req, res) => {
   try {
     userSchema
-      .findOne({ _id: req.body.userid })
+      .findOne({ _id: req.user.id })
       .select("leaveToApprove")
       .populate({
         path: "leaveToApprove",
@@ -100,7 +100,7 @@ exports.getLeavesApplied = async (req, res) => {
 exports.editProfile = async (req, res) => {
   try {
     let update = await userSchema.findByIdAndUpdate(req.user.id, req.body);
-    console.log(update)
+    console.log(update);
     res.status(200).json({
       message: "Profile Updated",
     });
@@ -141,6 +141,23 @@ exports.getProfileById = async (req, res) => {
         message: "User does not exists",
       });
     }
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+// get all managers
+exports.getAllManagers = async (req, res) => {
+  try {
+    let managers = await userSchema
+      .find({ role: roles.users.MANAGER })
+      .select("_id firstname lastname avatar phone designation");
+    res.status(200).json({
+      status: "ok",
+      data: managers,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
