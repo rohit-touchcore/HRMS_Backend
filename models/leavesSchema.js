@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const rolesConfig = require('../controllers/roles.config')
+const rolesConfig = require("../controllers/roles.config");
 
 const leavesSchema = new mongoose.Schema(
   {
@@ -25,6 +25,10 @@ const leavesSchema = new mongoose.Schema(
       required: true,
     },
     approvedBy: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+    },
+    rejectedBy: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "User",
     },

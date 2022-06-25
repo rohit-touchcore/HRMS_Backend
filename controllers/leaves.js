@@ -143,23 +143,39 @@ exports.leaveCancel = async (req, res) => {
 // Approve Leave
 exports.leaveApprove = async (req, res) => {
   try {
+    console.log(req);
     let leaveToCacel = await leavesSchema.findById(req.query.leaveid);
-    // let startdate = moment(leaveToCacel.leaveStart).format("YYYY-MM-DD");
-    // let enddate = moment(leaveToCacel.leaveEnd).format("YYYY-MM-DD");
-    // console.log(startdate);
-    if (leaveToCacel.leaveStatus === 2) {
+    if (leaveToCacel.leaveStatus === rolesConfig.leaves.APPROVED) {
       return res.status(200).json({
         status: "ok",
         message: "Leave is already approved",
       });
     }
-    // console.log();
     if (leaveToCacel.reviewers.includes(req.user.id)) {
-      await leavesSchema.findByIdAndUpdate(req.query.leaveid, {
-        leaveStatus: rolesConfig.leaves.APPROVED,
+      let statusUpdated = await leavesSchema.findByIdAndUpdate(
+        req.query.leaveid,
+        {
+          leaveStatus: rolesConfig.leaves.APPROVED,
+          $push: {
+            approvedBy: req.user.id,
+          },
+        }
+      );
+      await userSchema.findByIdAndUpdate(statusUpdated.appliedBy, {
+        $pull: {
+          leaveApplied: statusUpdated._id,
+        },
+        $push: {
+          leaveApproved: statusUpdated._id,
+        },
+      });
+      await userSchema.findByIdAndUpdate(req.user.id, {
+        $pull: {
+          leaveToApprove: statusUpdated._id,
+        },
       });
       return res.status(200).json({
-        status: "error",
+        status: "ok",
         message: "Leave Approved",
       });
     } else {
@@ -175,12 +191,9 @@ exports.leaveApprove = async (req, res) => {
   }
 };
 // Reject Leave
-exports.leaveApprove = async (req, res) => {
+exports.leaveReject = async (req, res) => {
   try {
     let leaveToCacel = await leavesSchema.findById(req.query.leaveid);
-    // let startdate = moment(leaveToCacel.leaveStart).format("YYYY-MM-DD");
-    // let enddate = moment(leaveToCacel.leaveEnd).format("YYYY-MM-DD");
-    // console.log(startdate);
     if (leaveToCacel.leaveStatus === 2) {
       return res.status(200).json({
         status: "ok",
@@ -188,12 +201,31 @@ exports.leaveApprove = async (req, res) => {
       });
     }
     if (leaveToCacel.reviewers.includes(req.user.id)) {
-      await leavesSchema.findByIdAndUpdate(req.query.leaveid, {
-        leaveStatus: rolesConfig.leaves.REJECTED,
+      let statusUpdated = await leavesSchema.findByIdAndUpdate(
+        req.query.leaveid,
+        {
+          leaveStatus: rolesConfig.leaves.REJECTED,
+          $push: {
+            rejectedBy: req.user.id,
+          },
+        }
+      );
+      await userSchema.findByIdAndUpdate(statusUpdated.appliedBy, {
+        $pull: {
+          leaveApplied: statusUpdated._id,
+        },
+        $push: {
+          leaveRejected: statusUpdated._id,
+        },
+      });
+      await userSchema.findByIdAndUpdate(req.user.id, {
+        $pull: {
+          leaveToApprove: statusUpdated._id,
+        },
       });
       return res.status(200).json({
-        status: "error",
-        message: "Leave Approved",
+        status: "ok",
+        message: "Leave Rejected",
       });
     } else {
       return res.status(500).json({

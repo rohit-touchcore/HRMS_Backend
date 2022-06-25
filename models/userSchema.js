@@ -44,6 +44,11 @@ const userSchema = new mongoose.Schema(
       ref: "Leaves",
       default: [],
     },
+    leaveRejected: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Leaves",
+      default: [],
+    },
     leaveToApprove: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Leaves",
