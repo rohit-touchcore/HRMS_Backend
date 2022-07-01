@@ -3,6 +3,8 @@ const userSchema = require("../models/userSchema");
 const mongoose = require("mongoose");
 const rolesConfig = require("./roles.config");
 const moment = require("moment");
+const nodemailer = require("nodemailer");
+
 exports.applyLeaves = async (req, res) => {
   try {
     let startdate = moment(req.body.startdate, "DD-MM-YYYY").format(
@@ -111,7 +113,7 @@ exports.leaveCancel = async (req, res) => {
     let leaveToCacel = await leavesSchema.findById(req.query.leaveid);
     // let startdate = moment(leaveToCacel.leaveStart).format("YYYY-MM-DD");
     // let enddate = moment(leaveToCacel.leaveEnd).format("YYYY-MM-DD");
-    console.log(startdate);
+    // console.log(startdate);
     if (leaveToCacel.leaveStatus === 0) {
       return res.status(200).json({
         status: "ok",
@@ -143,7 +145,6 @@ exports.leaveCancel = async (req, res) => {
 // Approve Leave
 exports.leaveApprove = async (req, res) => {
   try {
-    console.log(req);
     let leaveToCacel = await leavesSchema.findById(req.query.leaveid);
     if (leaveToCacel.leaveStatus === rolesConfig.leaves.APPROVED) {
       return res.status(200).json({
@@ -156,23 +157,44 @@ exports.leaveApprove = async (req, res) => {
         req.query.leaveid,
         {
           leaveStatus: rolesConfig.leaves.APPROVED,
-          $push: {
+          $set: {
             approvedBy: req.user.id,
           },
         }
       );
-      await userSchema.findByIdAndUpdate(statusUpdated.appliedBy, {
-        $pull: {
-          leaveApplied: statusUpdated._id,
-        },
-        $push: {
-          leaveApproved: statusUpdated._id,
-        },
-      });
-      await userSchema.findByIdAndUpdate(req.user.id, {
+      let approvedFor = await userSchema.findByIdAndUpdate(
+        statusUpdated.appliedBy,
+        {
+          $pull: {
+            leaveApplied: statusUpdated._id,
+          },
+          $push: {
+            leaveApproved: statusUpdated._id,
+          },
+        }
+      );
+      let approvedBy = await userSchema.findByIdAndUpdate(req.user.id, {
         $pull: {
           leaveToApprove: statusUpdated._id,
         },
+      });
+      let transporter = nodemailer.createTransport({
+        host: "smtp.office365.com", // Office 365 server
+        port: 587,
+        secure: false,
+        auth: {
+          user: "rohita@touchcoresystems.com",
+          pass: "Kholdeyar17",
+        },
+        tls: {
+          ciphers: "SSLv3",
+        },
+      });
+      await transporter.sendMail({
+        from: `"HRMS" ${process.env.EMAIL}`, // sender address
+        to: `${approvedFor.email}`, // list of receivers
+        subject: "Leave Approved!", // Subject line
+        text: `Hey ${approvedFor.firstname} ${approvedFor.lastname}! Your leave has been approved by ${approvedBy.firstname} ${approvedBy.lastname}`, // plain text body
       });
       return res.status(200).json({
         status: "ok",
@@ -185,6 +207,7 @@ exports.leaveApprove = async (req, res) => {
       });
     }
   } catch (err) {
+    console.log(err);
     return res.status(500).json({
       message: "Something went wrong",
     });
@@ -205,23 +228,44 @@ exports.leaveReject = async (req, res) => {
         req.query.leaveid,
         {
           leaveStatus: rolesConfig.leaves.REJECTED,
-          $push: {
+          $set: {
             rejectedBy: req.user.id,
           },
         }
       );
-      await userSchema.findByIdAndUpdate(statusUpdated.appliedBy, {
-        $pull: {
-          leaveApplied: statusUpdated._id,
-        },
-        $push: {
-          leaveRejected: statusUpdated._id,
-        },
-      });
-      await userSchema.findByIdAndUpdate(req.user.id, {
+      let rejectedFor = await userSchema.findByIdAndUpdate(
+        statusUpdated.appliedBy,
+        {
+          $pull: {
+            leaveApplied: statusUpdated._id,
+          },
+          $push: {
+            leaveRejected: statusUpdated._id,
+          },
+        }
+      );
+      let rejectedBy = await userSchema.findByIdAndUpdate(req.user.id, {
         $pull: {
           leaveToApprove: statusUpdated._id,
         },
+      });
+      let transporter = nodemailer.createTransport({
+        host: "smtp.office365.com", // Office 365 server
+        port: 587,
+        secure: false,
+        auth: {
+          user: "rohita@touchcoresystems.com",
+          pass: "Kholdeyar17",
+        },
+        tls: {
+          ciphers: "SSLv3",
+        },
+      });
+      await transporter.sendMail({
+        from: `"HRMS" "rohita@touchcoresystems.com"`, // sender address
+        to: `${rejectedFor.email}`, // list of receivers
+        subject: "Leave Rejected!", // Subject line
+        text: `Hey ${rejectedFor.firstname} ${rejectedFor.lastname}! Your leave has been rejected by ${rejectedBy.firstname} ${rejectedBy.lastname}`,
       });
       return res.status(200).json({
         status: "ok",
@@ -234,6 +278,7 @@ exports.leaveReject = async (req, res) => {
       });
     }
   } catch (err) {
+    console.log(err);
     return res.status(500).json({
       message: "Something went wrong",
     });

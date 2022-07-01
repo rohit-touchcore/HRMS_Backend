@@ -6,6 +6,7 @@ const routeConfig = {
   GET_LEAVES: "/get-leaves",
   GET_ALL_MANAGERS: "/get-all-managers",
   GET_APPROVED_LEAVES: "/get-approved-leaves",
+  GET_REJECTED_LEAVES: "/get-rejected-leaves",
   GET_LEAVES_TO_APPROVE: "/get-leaves-to-approve",
   GET_PROFILE_BY_ID: "/get-profile-by-id",
   GET_ALL_USERS: "/get-all-users",

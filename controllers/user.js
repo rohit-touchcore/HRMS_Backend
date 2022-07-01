@@ -46,6 +46,48 @@ exports.getApprovedLeaves = async (req, res) => {
             model: "User",
             select: "avatar firstname lastname phone email role",
           },
+          {
+            path: "approvedBy",
+            model: "User",
+            select: "avatar firstname lastname phone email role",
+          },
+        ],
+      })
+      .exec(function (err, leaves) {
+        if (err) return err;
+        // console.log(product);
+        res.status(200).json({
+          message: "Leaves Fetched",
+          data: leaves,
+        });
+      });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+// Get Rejected Leaves (Leaves History)
+exports.getRejectedLeaves = async (req, res) => {
+  try {
+    userSchema
+      .findOne({ _id: req.body.userid })
+      .select("leaveRejected")
+      .populate({
+        path: "leaveRejected",
+        populate: [
+          {
+            path: "reviewers",
+            model: "User",
+            select: "avatar firstname lastname phone email role",
+          },
+          {
+            path: "rejectedBy",
+            model: "User",
+            select: "avatar firstname lastname phone email role",
+          },
         ],
       })
       .exec(function (err, leaves) {
@@ -100,7 +142,7 @@ exports.getLeavesApplied = async (req, res) => {
 exports.editProfile = async (req, res) => {
   try {
     let update = await userSchema.findByIdAndUpdate(req.user.id, req.body);
-    console.log(update);
+    // console.log(update);
     res.status(200).json({
       message: "Profile Updated",
     });

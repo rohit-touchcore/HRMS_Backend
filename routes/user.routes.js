@@ -13,6 +13,7 @@ const {
   editProfileProfile,
   getAllUsers,
   getAllManagers,
+  getRejectedLeaves,
 } = require("../controllers/user");
 
 const routeConfig = require("./routes.config");
@@ -23,6 +24,12 @@ router.post(
   routeConfig.GET_APPROVED_LEAVES,
   checkIfLoggedIn,
   getApprovedLeaves
+);
+
+router.post(
+  routeConfig.GET_REJECTED_LEAVES,
+  checkIfLoggedIn,
+  getRejectedLeaves
 );
 
 router.post(

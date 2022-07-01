@@ -9,7 +9,6 @@ app.use(cors())
 const connectDB = require("./db/connection");
 dotenv.config({ path: "./.env" });
 connectDB();
-console.log('hit')
 // Express Configurations
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

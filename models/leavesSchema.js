@@ -25,11 +25,11 @@ const leavesSchema = new mongoose.Schema(
       required: true,
     },
     approvedBy: {
-      type: [mongoose.Schema.Types.ObjectId],
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
     rejectedBy: {
-      type: [mongoose.Schema.Types.ObjectId],
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   },

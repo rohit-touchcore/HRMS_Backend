@@ -104,7 +104,7 @@ exports.userSignup = async (req, res) => {
       message: "The user successfully registered",
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return res.status(500).json({
       message: "Something went wrong",
     });
