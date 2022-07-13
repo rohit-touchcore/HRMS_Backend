@@ -1,5 +1,6 @@
 const userSchema = require("../models/userSchema");
 const roles = require("./roles.config");
+const leavesSchema = require("../models/leavesSchema");
 // Get Leaves To Approve
 exports.getLeavesToApprove = async (req, res) => {
   try {
@@ -11,6 +12,21 @@ exports.getLeavesToApprove = async (req, res) => {
         populate: [
           {
             path: "appliedBy",
+            model: "User",
+            select: "avatar firstname lastname phone email role",
+          },
+          {
+            path: "reviewers",
+            model: "User",
+            select: "avatar firstname lastname phone email role",
+          },
+          {
+            path: "approvedBy",
+            model: "User",
+            select: "avatar firstname lastname phone email role",
+          },
+          {
+            path: "rejectedBy",
             model: "User",
             select: "avatar firstname lastname phone email role",
           },
@@ -93,6 +109,33 @@ exports.getRejectedLeaves = async (req, res) => {
       .exec(function (err, leaves) {
         if (err) return err;
         // console.log(product);
+        res.status(200).json({
+          message: "Leaves Fetched",
+          data: leaves,
+        });
+      });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+// Entire Leave History
+exports.getAllLeaves = async (req, res) => {
+  try {
+    console.log("req came");
+    leavesSchema
+      .find({ appliedBy: req.body.userid })
+      .select(
+        "leaveStatus approvedBy leaveStart leaveEnd leaveStatus reviewers"
+      )
+      .populate(
+        "reviewers approvedBy",
+        "avatar firstname lastname phone email role"
+      )
+      .exec(function (err, leaves) {
+        if (err) return err;
         res.status(200).json({
           message: "Leaves Fetched",
           data: leaves,

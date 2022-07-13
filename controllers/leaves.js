@@ -3,7 +3,8 @@ const userSchema = require("../models/userSchema");
 const mongoose = require("mongoose");
 const rolesConfig = require("./roles.config");
 const moment = require("moment");
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
+const ObjectId = require("mongodb").ObjectID;
 
 exports.applyLeaves = async (req, res) => {
   try {
@@ -111,9 +112,6 @@ exports.leaveUpdate = async (req, res) => {
 exports.leaveCancel = async (req, res) => {
   try {
     let leaveToCacel = await leavesSchema.findById(req.query.leaveid);
-    // let startdate = moment(leaveToCacel.leaveStart).format("YYYY-MM-DD");
-    // let enddate = moment(leaveToCacel.leaveEnd).format("YYYY-MM-DD");
-    // console.log(startdate);
     if (leaveToCacel.leaveStatus === 0) {
       return res.status(200).json({
         status: "ok",
@@ -125,7 +123,7 @@ exports.leaveCancel = async (req, res) => {
         leaveStatus: rolesConfig.leaves.CANCELLED,
       });
       return res.status(200).json({
-        status: "error",
+        status: "ok",
         message: "Leave Cancelled",
       });
     } else {
@@ -156,10 +154,10 @@ exports.leaveApprove = async (req, res) => {
       let statusUpdated = await leavesSchema.findByIdAndUpdate(
         req.query.leaveid,
         {
-          leaveStatus: rolesConfig.leaves.APPROVED,
           $set: {
-            approvedBy: req.user.id,
+            approvedBy: mongoose.Types.ObjectId(req.user.id),
           },
+          leaveStatus: rolesConfig.leaves.APPROVED,
         }
       );
       let approvedFor = await userSchema.findByIdAndUpdate(
@@ -173,29 +171,29 @@ exports.leaveApprove = async (req, res) => {
           },
         }
       );
-      let approvedBy = await userSchema.findByIdAndUpdate(req.user.id, {
-        $pull: {
-          leaveToApprove: statusUpdated._id,
-        },
-      });
-      let transporter = nodemailer.createTransport({
-        host: "smtp.office365.com", // Office 365 server
-        port: 587,
-        secure: false,
-        auth: {
-          user: "rohita@touchcoresystems.com",
-          pass: "Kholdeyar17",
-        },
-        tls: {
-          ciphers: "SSLv3",
-        },
-      });
-      await transporter.sendMail({
-        from: `"HRMS" ${process.env.EMAIL}`, // sender address
-        to: `${approvedFor.email}`, // list of receivers
-        subject: "Leave Approved!", // Subject line
-        text: `Hey ${approvedFor.firstname} ${approvedFor.lastname}! Your leave has been approved by ${approvedBy.firstname} ${approvedBy.lastname}`, // plain text body
-      });
+      // let approvedBy = await userSchema.findByIdAndUpdate(req.user.id, {
+      //   $pull: {
+      //     leaveToApprove: statusUpdated._id,
+      //   },
+      // });
+      // let transporter = nodemailer.createTransport({
+      //   host: "smtp.office365.com", // Office 365 server
+      //   port: 587,
+      //   secure: false,
+      //   auth: {
+      //     user: "rohita@touchcoresystems.com",
+      //     pass: "Kholdeyar17",
+      //   },
+      //   tls: {
+      //     ciphers: "SSLv3",
+      //   },
+      // });
+      // await transporter.sendMail({
+      //   from: `"HRMS" ${process.env.EMAIL}`, // sender address
+      //   to: `${approvedFor.email}`, // list of receivers
+      //   subject: "Leave Approved!", // Subject line
+      //   text: `Hey ${approvedFor.firstname} ${approvedFor.lastname}! Your leave has been approved by ${approvedBy.firstname} ${approvedBy.lastname}`, // plain text body
+      // });
       return res.status(200).json({
         status: "ok",
         message: "Leave Approved",
@@ -229,7 +227,7 @@ exports.leaveReject = async (req, res) => {
         {
           leaveStatus: rolesConfig.leaves.REJECTED,
           $set: {
-            rejectedBy: req.user.id,
+            rejectedBy: mongoose.Types.ObjectId(req.user.id),
           },
         }
       );
@@ -244,29 +242,29 @@ exports.leaveReject = async (req, res) => {
           },
         }
       );
-      let rejectedBy = await userSchema.findByIdAndUpdate(req.user.id, {
-        $pull: {
-          leaveToApprove: statusUpdated._id,
-        },
-      });
-      let transporter = nodemailer.createTransport({
-        host: "smtp.office365.com", // Office 365 server
-        port: 587,
-        secure: false,
-        auth: {
-          user: "rohita@touchcoresystems.com",
-          pass: "Kholdeyar17",
-        },
-        tls: {
-          ciphers: "SSLv3",
-        },
-      });
-      await transporter.sendMail({
-        from: `"HRMS" "rohita@touchcoresystems.com"`, // sender address
-        to: `${rejectedFor.email}`, // list of receivers
-        subject: "Leave Rejected!", // Subject line
-        text: `Hey ${rejectedFor.firstname} ${rejectedFor.lastname}! Your leave has been rejected by ${rejectedBy.firstname} ${rejectedBy.lastname}`,
-      });
+      // let rejectedBy = await userSchema.findByIdAndUpdate(req.user.id, {
+      //   $pull: {
+      //     leaveToApprove: statusUpdated._id,
+      //   },
+      // });
+      // let transporter = nodemailer.createTransport({
+      //   host: "smtp.office365.com", // Office 365 server
+      //   port: 587,
+      //   secure: false,
+      //   auth: {
+      //     user: "rohita@touchcoresystems.com",
+      //     pass: "Kholdeyar17",
+      //   },
+      //   tls: {
+      //     ciphers: "SSLv3",
+      //   },
+      // });
+      // await transporter.sendMail({
+      //   from: `"HRMS" "rohita@touchcoresystems.com"`, // sender address
+      //   to: `${rejectedFor.email}`, // list of receivers
+      //   subject: "Leave Rejected!", // Subject line
+      //   text: `Hey ${rejectedFor.firstname} ${rejectedFor.lastname}! Your leave has been rejected by ${rejectedBy.firstname} ${rejectedBy.lastname}`,
+      // });
       return res.status(200).json({
         status: "ok",
         message: "Leave Rejected",

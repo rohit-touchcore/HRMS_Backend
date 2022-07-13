@@ -7,6 +7,10 @@ const leavesSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     reviewers: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "User",
@@ -23,10 +27,6 @@ const leavesSchema = new mongoose.Schema(
     leaveEnd: {
       type: Date,
       required: true,
-    },
-    approvedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
     },
     rejectedBy: {
       type: mongoose.Schema.Types.ObjectId,
