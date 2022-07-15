@@ -124,14 +124,13 @@ exports.getRejectedLeaves = async (req, res) => {
 // Entire Leave History
 exports.getAllLeaves = async (req, res) => {
   try {
-    console.log("req came");
     leavesSchema
       .find({ appliedBy: req.body.userid })
       .select(
-        "leaveStatus approvedBy leaveStart leaveEnd leaveStatus reviewers"
+        "leaveStatus approvedBy rejectedBy leaveStart leaveEnd leaveStatus reviewers"
       )
       .populate(
-        "reviewers approvedBy",
+        "reviewers approvedBy rejectedBy",
         "avatar firstname lastname phone email role"
       )
       .exec(function (err, leaves) {
